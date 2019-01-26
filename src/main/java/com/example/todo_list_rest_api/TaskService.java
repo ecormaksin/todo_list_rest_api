@@ -1,7 +1,6 @@
 package com.example.todo_list_rest_api;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,8 @@ public class TaskService {
 		return taskRepository.findAllOrderByTitle();
 	}
 	
-	public Optional<Task> findOne(Integer id) {
-		return taskRepository.findById(id);
+	public Task getOne(Integer id) {
+		return taskRepository.getOne(id);
 	}
 	
 	public Task create(Task task) {

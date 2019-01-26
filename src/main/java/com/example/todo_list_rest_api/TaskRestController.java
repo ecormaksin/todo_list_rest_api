@@ -1,12 +1,17 @@
 package com.example.todo_list_rest_api;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,7 +27,25 @@ public class TaskRestController {
 	}
 	
 	@GetMapping(value = "{id}")
-	Optional<Task> getTask(@PathVariable Integer id) {
-		return taskService.findOne(id);
+	Task getTask(@PathVariable Integer id) {
+		return taskService.getOne(id);
+	}
+	
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	Task postTask(@RequestBody Task task) {
+		return taskService.create(task);
+	}
+	
+	@PutMapping(value = "{id}")
+	Task putTask(@PathVariable Integer id, @RequestBody Task task) {
+		task.setId(id);
+		return taskService.update(task);
+	}
+	
+	@DeleteMapping(value = "{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	void deleteTask(@PathVariable Integer id) {
+		taskService.delete(id);
 	}
 }
