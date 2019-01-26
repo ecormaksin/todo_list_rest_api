@@ -17,6 +17,10 @@ public class TaskService {
 		return taskRepository.findAllOrderByTitle();
 	}
 	
+	public List<Task> findByKeyword(String keyword) {
+		return taskRepository.findByKeyword(keyword);
+	}
+	
 	public Task getOne(Integer id) {
 		return taskRepository.getOne(id);
 	}
