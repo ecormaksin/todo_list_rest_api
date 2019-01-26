@@ -6,6 +6,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.example.todo_list_rest_api.task.Task;
+import com.example.todo_list_rest_api.task.TaskRepository;
+
 @SpringBootApplication
 @ComponentScan
 public class TodoListRestApiApplication implements CommandLineRunner {

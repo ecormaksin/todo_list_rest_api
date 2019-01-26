@@ -1,4 +1,4 @@
-package com.example.todo_list_rest_api;
+package com.example.todo_list_rest_api.task;
 
 import java.util.List;
 
