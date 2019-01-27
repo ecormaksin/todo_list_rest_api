@@ -1,9 +1,11 @@
 package com.example.todo_list_rest_api.task;
 
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +29,9 @@ public class TaskRestController {
 	TaskService taskService;
 
 	@GetMapping
-	List<Task> getTasks(@RequestParam(required=false) String keyword) {
-		if (null == keyword) return taskService.findAll();
-		return taskService.findByKeyword(keyword);
+	Page<Task> getTasks(@PageableDefault(size=20) Pageable pageable, @RequestParam(required=false) String keyword) {
+		if (null == keyword) return taskService.findAll(pageable);
+		return taskService.findByKeyword(pageable, keyword);
 	}
 	
 	@GetMapping(value = "{id}")

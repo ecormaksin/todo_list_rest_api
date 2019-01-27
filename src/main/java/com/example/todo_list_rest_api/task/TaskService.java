@@ -1,8 +1,8 @@
 package com.example.todo_list_rest_api.task;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,12 +13,12 @@ public class TaskService {
 	@Autowired
 	TaskRepository taskRepository;
 	
-	public List<Task> findAll() {
-		return taskRepository.findAllOrderByTitle();
+	public Page<Task> findAll(Pageable pageable) {
+		return taskRepository.findAllOrderByTitle(pageable);
 	}
 	
-	public List<Task> findByKeyword(String keyword) {
-		return taskRepository.findByKeyword(keyword);
+	public Page<Task> findByKeyword(Pageable pageable, String keyword) {
+		return taskRepository.findByKeyword(pageable, keyword);
 	}
 	
 	public Task getOne(Integer id) {
