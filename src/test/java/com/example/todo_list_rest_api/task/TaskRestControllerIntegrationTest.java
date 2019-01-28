@@ -1,9 +1,11 @@
 package com.example.todo_list_rest_api.task;
 
-import static com.jayway.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.is;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -19,7 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.example.todo_list_rest_api.TodoListRestApiApplication;
-import com.jayway.restassured.RestAssured;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
@@ -33,12 +37,16 @@ public class TaskRestControllerIntegrationTest {
 
 	@Value("${local.server.port}")
 	int port;
-	
+
+	Map<Boolean, Map<Task, Task>> searchTaskAllocationMap = new HashMap<>();
 	Map<Task, Task> searchAllTaskMap = new TreeMap<>();
 	Map<Task, Task> searchIncludedTaskMap = new TreeMap<>();
 	Map<Task, Task> searchExcludedTaskMap = new TreeMap<>();
 	
 	{
+		searchTaskAllocationMap.put(Boolean.TRUE, searchIncludedTaskMap);
+		searchTaskAllocationMap.put(Boolean.FALSE, searchExcludedTaskMap);
+		
 		setSearchData("あタイトル1", "内容1", true);
 		setSearchData("あタイトル2", "内容2あ", true);
 		setSearchData("あタイトル3", "内あ容3", true);
@@ -77,10 +85,19 @@ public class TaskRestControllerIntegrationTest {
 		List<Task> expected = new ArrayList<Task>(searchAllTaskMap.values());
 		taskRepository.saveAll(expected);
 		
-		when().get("/api/tasks")
+		Response response = get("/api/tasks")
 			.then()
-			.statusCode(HttpStatus.OK.value())
-			.body("numberOfElements", is(16));
-			;
+				.statusCode(HttpStatus.OK.value())
+				.body("numberOfElements", is(16))
+				.extract().response();
+
+		System.out.println("response.jsonPath().prettyPrint(): " + response.jsonPath().prettyPrint());
+
+		List<Task> tasks = response.jsonPath().getList("content", Task.class);
+		System.out.println("tasks: " + tasks.toString());
+		for (Task task : tasks) {
+			System.out.println("task: " + task.toString());
+			assertTrue(searchAllTaskMap.containsKey(task));
+		}
 	}
 }
