@@ -7,6 +7,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
@@ -29,18 +32,21 @@ public class Task implements Comparable<Task> {
 	private String detail;
 	
 	@Override
-	public int compareTo(Task other) {
+	public int compareTo(final Task other) {
 		
-		int titleCompareResult = this.title.compareToIgnoreCase(other.title);
+		int titleCompareResult = compareToIgnoreCase(this.title, other.title);
 		if (0 != titleCompareResult) {
 			return titleCompareResult;
 		}
 		
-		int detailCompareResult = this.detail.compareToIgnoreCase(other.detail);
+		int detailCompareResult =  compareToIgnoreCase(this.detail, other.detail);
 		if (0 != detailCompareResult) {
 			return detailCompareResult;
 		}
-		
-		return 0;
+		return  ObjectUtils.compare(this.id, other.id);
+	}
+	
+	private int compareToIgnoreCase(final String mine, final String theirs) {
+		return StringUtils.defaultString(mine).compareToIgnoreCase(StringUtils.defaultString(theirs));
 	}
 }

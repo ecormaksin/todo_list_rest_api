@@ -1,6 +1,8 @@
 package com.example.todo_list_rest_api.task;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,9 +31,11 @@ public class TaskRestController {
 	TaskService taskService;
 
 	@GetMapping
-	Page<Task> getTasks(@PageableDefault(size=20) Pageable pageable, @RequestParam(required=false) String keyword) {
+	Page<Task> getTasks(@PageableDefault(size=20) Pageable pageable
+			, @RequestParam(required=false) String keyword) throws UnsupportedEncodingException {
 		if (null == keyword) return taskService.findAll(pageable);
-		return taskService.findByKeyword(pageable, keyword);
+		String decodedKeyword = URLDecoder.decode(keyword, "UTF-8");;
+		return taskService.findByKeyword(pageable, decodedKeyword);
 	}
 	
 	@GetMapping(value = "{id}")
