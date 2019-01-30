@@ -9,14 +9,19 @@ import java.util.TreeMap;
 
 public class SearchTargetTasks {
 
-	Map<Boolean, Map<Task, Task>> allocationMap = new HashMap<>();
+	enum SearchTarget {
+		INCLUDED,
+		EXCLUDED;
+	}
+	
+	Map<SearchTarget, Map<Task, Task>> allocationMap = new HashMap<>();
 	Map<Task, Task> allTaskMap = new TreeMap<>();
 	Map<Task, Task> includedMap = new TreeMap<>();
 	Map<Task, Task> excludedMap = new TreeMap<>();
 	
 	{
-		allocationMap.put(Boolean.TRUE, includedMap);
-		allocationMap.put(Boolean.FALSE, excludedMap);
+		allocationMap.put(SearchTarget.INCLUDED, includedMap);
+		allocationMap.put(SearchTarget.EXCLUDED, excludedMap);
 		
 		setData("あタイトル1", "内容1");
 		setData("あタイトル2", "内容2あ");
@@ -28,7 +33,7 @@ public class SearchTargetTasks {
 		setData("タイあトル8", "内あ容8");
 		setData("タイトル9", "あ内容9");
 		setData("タイトル10あ", "内容10あ");
-		setData("タイトル11", "内容11", false);
+		setData("タイトル11", "内容11", SearchTarget.EXCLUDED);
 		setData("タイトル12あ", "あ内容12");
 		setData("タイトル13", "内あ容13");
 		setData("タイトル14あ", "内あ容14");
@@ -40,12 +45,12 @@ public class SearchTargetTasks {
 	}
 	
 	private void setData(String title, String detail) {
-		setData(title, detail, true);
+		setData(title, detail, SearchTarget.INCLUDED);
 	}
 	
-	private void setData(String title, String detail, boolean isIncluded) {
+	private void setData(String title, String detail, SearchTarget searchTarget) {
 		Task task = new Task(null, title, detail);
-		Map<Task, Task> target = isIncluded ? includedMap : excludedMap;
+		Map<Task, Task> target = allocationMap.get(searchTarget);
 		target.put(task, task);
 	}
 	
