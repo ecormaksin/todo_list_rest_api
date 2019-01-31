@@ -49,7 +49,7 @@ public class SearchTargetTasks {
 	}
 	
 	private void setData(String title, String detail, SearchTarget searchTarget) {
-		Task task = new Task(null, title, detail);
+		Task task = new Task(title, detail);
 		Map<Task, Task> target = allocationMap.get(searchTarget);
 		target.put(task, task);
 	}

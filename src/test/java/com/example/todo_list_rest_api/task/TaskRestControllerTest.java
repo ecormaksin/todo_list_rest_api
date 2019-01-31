@@ -131,42 +131,8 @@ public class TaskRestControllerTest {
 	}
 
 	@Test
-	public void test同タイトル同内容時にid昇順() throws Exception {
-		confirmIdSort(SeachKeyword.NONE);
-	}
-	
-	@Test
-	public void test同タイトル同内容時にid昇順_絞り込み() throws Exception {
-		confirmIdSort(SeachKeyword.EXISTS);
-	}
-
-	private void confirmIdSort(SeachKeyword seachKeyword) throws Exception {
-		String title = "タイトルテスト";
-		String detail = "内容テスト";
-		taskRepository.save(new Task(null, title, detail));
-		taskRepository.save(new Task(null, title, detail));
-
-		String endPoint = "/api/tasks";
-		
-		if (SeachKeyword.EXISTS == seachKeyword) {
-			endPoint += "?keyword=" + URLEncoder.encode("テスト", "UTF-8");
-		}
-		
-		Response response = get(endPoint)
-				.then()
-					.statusCode(HttpStatus.OK.value())
-					.body("numberOfElements", is(2))
-					.extract().response();
-		
-		List<Task> actualTasks = response.jsonPath().getList("content", Task.class);
-		Task firstTask = actualTasks.get(0);
-		Task secondTask = actualTasks.get(1);
-		assertTrue(firstTask.getId().compareTo(secondTask.getId()) < 0);
-	}
-	
-	@Test
 	public void test登録() throws Exception {
-		Task task = new Task(null, "追加テストタイトル", "追加テスト内容");
+		Task task = new Task("追加テストタイトル", "追加テスト内容");
 		
 		given().body(task)
 			.contentType(ContentType.JSON)
@@ -180,8 +146,24 @@ public class TaskRestControllerTest {
 	}
 
 	@Test
+	public void test登録_同タイトル同内容重複を吸収() throws Exception {
+		Task task = new Task("追加テストタイトル", "追加テスト内容");
+		Task created = taskRepository.save(task);
+		
+		given().body(task)
+			.contentType(ContentType.JSON)
+			.and()
+			.when().post("/api/tasks")
+			.then()
+				.statusCode(HttpStatus.CREATED.value())
+				.body("id", is(created.getId()))
+				.body("title", is(created.getTitle()))
+				.body("detail", is(created.getDetail()));
+	}
+
+	@Test
 	public void test更新() throws Exception {
-		Task task = new Task(null, "更新テストタイトル", "更新テスト内容");
+		Task task = new Task("更新テストタイトル", "更新テスト内容");
 		Task created = taskRepository.save(task);
 		created.setTitle(created.getTitle() + "あ");
 		created.setDetail(created.getDetail() + "あ");
@@ -199,7 +181,7 @@ public class TaskRestControllerTest {
 
 	@Test
 	public void test削除() throws Exception {
-		Task task = new Task(null, "削除テストタイトル", "削除テスト内容");
+		Task task = new Task("削除テストタイトル", "削除テスト内容");
 		Task created = taskRepository.save(task);
 		
 		delete("/api/tasks/{id}", created.getId())
@@ -207,6 +189,18 @@ public class TaskRestControllerTest {
 				.statusCode(HttpStatus.NO_CONTENT.value());
 
 		get("/api/tasks/{id}", created.getId())
+			.then()
+				.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+	}
+
+	@Test
+	public void test削除_削除済みのものを削除しようとした場合はエラー() throws Exception {
+		Task task = new Task("削除テストタイトル", "削除テスト内容");
+		Task created = taskRepository.save(task);
+		Integer id = created.getId();
+		taskRepository.delete(created);
+		
+		delete("/api/tasks/{id}", id)
 			.then()
 				.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 	}

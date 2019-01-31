@@ -12,24 +12,53 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "tasks")
-@Data
 @NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //https://teratail.com/questions/128905
 public class Task implements Comparable<Task> {
+	
+	private static final String VALUE_REQUIRED_MESSAGE = " cannot be null or empty.";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Getter
+	@Setter
 	private Integer id;
 	@Column(nullable = false)
+	@Getter
 	private String title;
 	@Column(nullable = false)
+	@Getter
 	private String detail;
+	
+	public Task(String title, String detail) {
+		this(null, title, detail);
+	}
+
+	public Task(Integer id, String title, String detail) {
+		this.id = id;
+		setTitle(title);
+		setDetail(detail);
+	}
+	
+	public void setTitle(String title) {
+		if("".equals(StringUtils.defaultString(title))) {
+			throw new IllegalArgumentException("title" + VALUE_REQUIRED_MESSAGE);
+		}
+		this.title = title;
+	}
+	
+	public void setDetail(String detail) {
+		if("".equals(StringUtils.defaultString(detail))) {
+			throw new IllegalArgumentException("detail" + VALUE_REQUIRED_MESSAGE);
+		}
+		this.detail = detail;
+	}
 	
 	@Override
 	public int compareTo(final Task other) {

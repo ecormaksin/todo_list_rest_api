@@ -26,6 +26,8 @@ public class TaskService {
 	}
 	
 	public Task create(Task task) {
+		Task searched = taskRepository.findByAllFields(task.getTitle(), task.getDetail());
+		if (null != searched) return searched;
 		return taskRepository.save(task);
 	}
 
