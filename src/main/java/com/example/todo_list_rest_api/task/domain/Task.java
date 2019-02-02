@@ -1,4 +1,4 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.example.todo_list_rest_api.task.domain.Task;
+import com.example.todo_list_rest_api.task.exception.SameTaskExistsException;
+import com.example.todo_list_rest_api.task.service.TaskService;
 
 @RestController
 @RequestMapping("api/tasks")

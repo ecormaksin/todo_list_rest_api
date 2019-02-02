@@ -1,10 +1,12 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.example.todo_list_rest_api.task.domain.Task;
 
 public interface TaskRepository extends JpaRepository<Task, Integer> {
 

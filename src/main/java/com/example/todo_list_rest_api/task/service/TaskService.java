@@ -1,4 +1,4 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.service;
 
 import java.util.Optional;
 
@@ -7,6 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.todo_list_rest_api.task.domain.Task;
+import com.example.todo_list_rest_api.task.exception.SameTaskExistsException;
+import com.example.todo_list_rest_api.task.repository.TaskRepository;
 
 @Service
 @Transactional

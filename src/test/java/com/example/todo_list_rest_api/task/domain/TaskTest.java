@@ -1,6 +1,8 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.domain;
 
 import org.junit.Test;
+
+import com.example.todo_list_rest_api.task.domain.Task;
 
 public class TaskTest {
 

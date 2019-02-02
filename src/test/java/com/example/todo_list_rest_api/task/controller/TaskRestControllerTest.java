@@ -1,4 +1,4 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.controller;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.example.todo_list_rest_api.TodoListRestApiApplication;
+import com.example.todo_list_rest_api.task.domain.Task;
+import com.example.todo_list_rest_api.task.repository.TaskRepository;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

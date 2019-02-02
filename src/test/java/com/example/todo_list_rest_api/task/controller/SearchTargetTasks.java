@@ -1,4 +1,4 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.example.todo_list_rest_api.task.domain.Task;
 
 public class SearchTargetTasks {
 

@@ -1,4 +1,4 @@
-package com.example.todo_list_rest_api.task;
+package com.example.todo_list_rest_api.task.exception;
 
 public class SameTaskExistsException extends Exception {
 
