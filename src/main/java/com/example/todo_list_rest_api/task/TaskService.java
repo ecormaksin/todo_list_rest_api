@@ -25,9 +25,11 @@ public class TaskService {
 		return taskRepository.getOne(id);
 	}
 	
-	public Task create(Task task) {
+	public Task create(Task task) throws SameTaskExistsException {
 		Task searched = taskRepository.findByAllFields(task.getTitle(), task.getDetail());
-		if (null != searched) return searched;
+		if (null != searched) {
+			throw new SameTaskExistsException("Same task '" + searched.toString() + "' already exists.");
+		}
 		return taskRepository.save(task);
 	}
 

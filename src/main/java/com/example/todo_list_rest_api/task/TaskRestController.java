@@ -44,14 +44,22 @@ public class TaskRestController {
 	}
 	
 	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	ResponseEntity<Task> postTask(@RequestBody Task task, UriComponentsBuilder uriBuilder) {
-		Task created = taskService.create(task);
-		URI location = uriBuilder.path("api/tasks/{id}")
-				.buildAndExpand(created.getId()).toUri();
-		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(location);
-		return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
+	ResponseEntity<ResponseBody> postTask(@RequestBody Task task, UriComponentsBuilder uriBuilder) {
+		
+		Task created = null;
+		HttpHeaders headers = null;
+		
+		try {
+			created = taskService.create(task);
+			URI location = uriBuilder.path("api/tasks/{id}")
+					.buildAndExpand(created.getId()).toUri();
+			headers = new HttpHeaders();
+			headers.setLocation(location);
+		} catch (SameTaskExistsException e) {
+			return new ResponseEntity<>(new ResponseBody(e.getMessage(), task), HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<>(new ResponseBody("Task '" + created.toString() + "' is created.", created)
+				, headers, HttpStatus.CREATED);
 	}
 	
 	@PutMapping(value = "{id}")

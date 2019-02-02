@@ -61,6 +61,21 @@ public class Task implements Comparable<Task> {
 	}
 	
 	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		if (null != id) {
+			sb.append("id: ");
+			sb.append(id);
+			sb.append(", ");
+		}
+		sb.append("title: ");
+		sb.append(title);
+		sb.append(", detail: ");
+		sb.append(detail);
+		return sb.toString();
+	}
+	
+	@Override
 	public int compareTo(final Task other) {
 		
 		int titleCompareResult = compareToIgnoreCase(this.title, other.title);

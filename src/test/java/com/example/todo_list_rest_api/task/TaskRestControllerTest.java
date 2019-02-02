@@ -48,12 +48,12 @@ public class TaskRestControllerTest {
 	}
 	
 	@Test
-	public void test検索全件_ページネーションデフォルト20件() throws Exception {
+	public void 検索全件_ページネーションデフォルト20件() throws Exception {
 		getWithKeyword(SeachKeyword.NONE, 16);
 	}
 
 	@Test
-	public void test検索絞り込み_ページネーションデフォルト20件() throws Exception {
+	public void 検索絞り込み_ページネーションデフォルト20件() throws Exception {
 		getWithKeyword(SeachKeyword.EXISTS, 15);
 	}
 	
@@ -77,12 +77,12 @@ public class TaskRestControllerTest {
 	}
 	
 	@Test
-	public void test検索全件_ページネーション3件先頭() throws Exception {
+	public void 検索全件_ページネーション3件先頭() throws Exception {
 		getWithPagination(0, 4, 0, 3);
 	}
 
 	@Test
-	public void test検索全件_ページネーション3件末尾() throws Exception {
+	public void 検索全件_ページネーション3件末尾() throws Exception {
 		getWithPagination(15, 16, 5, 1);
 	}
 	
@@ -121,7 +121,7 @@ public class TaskRestControllerTest {
 	}
 	
 	@Test
-	public void test検索絞り込み_0件() throws Exception {
+	public void 検索絞り込み_0件() throws Exception {
 		saveSearchTargetTasks();
 		
 		get("/api/tasks?keyword=" + URLEncoder.encode("い", "UTF-8"))
@@ -131,7 +131,7 @@ public class TaskRestControllerTest {
 	}
 
 	@Test
-	public void test登録() throws Exception {
+	public void 登録() throws Exception {
 		Task task = new Task("追加テストタイトル", "追加テスト内容");
 		
 		given().body(task)
@@ -140,29 +140,26 @@ public class TaskRestControllerTest {
 			.when().post("/api/tasks")
 			.then()
 				.statusCode(HttpStatus.CREATED.value())
-				.body("id", is(notNullValue()))
-				.body("title", is(task.getTitle()))
-				.body("detail", is(task.getDetail()));
+				.body("task.id", is(notNullValue()))
+				.body("task.title", is(task.getTitle()))
+				.body("task.detail", is(task.getDetail()));
 	}
 
 	@Test
-	public void test登録_同タイトル同内容重複を吸収() throws Exception {
+	public void 登録_同タイトル同内容がすでに登録されていた場合はエラー() throws Exception {
 		Task task = new Task("追加テストタイトル", "追加テスト内容");
-		Task created = taskRepository.save(task);
+		taskRepository.save(task);
 		
 		given().body(task)
 			.contentType(ContentType.JSON)
 			.and()
 			.when().post("/api/tasks")
 			.then()
-				.statusCode(HttpStatus.CREATED.value())
-				.body("id", is(created.getId()))
-				.body("title", is(created.getTitle()))
-				.body("detail", is(created.getDetail()));
+				.statusCode(HttpStatus.CONFLICT.value());
 	}
 
 	@Test
-	public void test更新() throws Exception {
+	public void 更新() throws Exception {
 		Task task = new Task("更新テストタイトル", "更新テスト内容");
 		Task created = taskRepository.save(task);
 		created.setTitle(created.getTitle() + "あ");
@@ -180,7 +177,7 @@ public class TaskRestControllerTest {
 	}
 
 	@Test
-	public void test削除() throws Exception {
+	public void 削除() throws Exception {
 		Task task = new Task("削除テストタイトル", "削除テスト内容");
 		Task created = taskRepository.save(task);
 		
@@ -194,7 +191,7 @@ public class TaskRestControllerTest {
 	}
 
 	@Test
-	public void test削除_削除済みのものを削除しようとした場合はエラー() throws Exception {
+	public void 削除_削除済みのものを削除しようとした場合はエラー() throws Exception {
 		Task task = new Task("削除テストタイトル", "削除テスト内容");
 		Task created = taskRepository.save(task);
 		Integer id = created.getId();
