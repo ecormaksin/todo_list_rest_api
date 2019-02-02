@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -35,16 +36,20 @@ public class TaskRestControllerTest {
 
 	@Value("${local.server.port}")
 	int port;
-
-	@Before
-	public void setUp() {
-		taskRepository.deleteAll();
-		RestAssured.port = port;
-	}
 	
+	SearchTargetTasks searchTargetTasks;
+
 	enum SeachKeyword {
 		NONE,
 		EXISTS;
+	}
+	
+	@Before
+	public void setUp() {
+		taskRepository.deleteAll();
+		searchTargetTasks = new SearchTargetTasks();
+		taskRepository.saveAll(searchTargetTasks.getAllList());
+		RestAssured.port = port;
 	}
 	
 	@Test
@@ -58,13 +63,12 @@ public class TaskRestControllerTest {
 	}
 	
 	private void getWithKeyword(SeachKeyword seachKeyword, int numberOfElements) throws Exception {
-		SearchTargetTasks searchTargetTasks = saveSearchTargetTasks();
 		List<Task> expectedTasks = searchTargetTasks.getAllList();
 		String endPoint = "/api/tasks";
 		
 		if (SeachKeyword.EXISTS == seachKeyword) {
 			expectedTasks = searchTargetTasks.getIncludedList();
-			endPoint += "?keyword=" + URLEncoder.encode("あ", "UTF-8");
+			endPoint += getKeywordRequestParam("あ");
 		}
 		
 		Response response = get(endPoint)
@@ -74,6 +78,10 @@ public class TaskRestControllerTest {
 					.extract().response();
 
 		compareList(expectedTasks, response);
+	}
+	
+	private String getKeywordRequestParam(String keyword) throws UnsupportedEncodingException {
+		return "?keyword=" + URLEncoder.encode(keyword, "UTF-8");
 	}
 	
 	@Test
@@ -89,7 +97,6 @@ public class TaskRestControllerTest {
 	private void getWithPagination(int fromIndex, int toIndex, int page, int numberOfElements) {
 		final int countPerPage = 3;
 		
-		SearchTargetTasks searchTargetTasks = saveSearchTargetTasks();
 		List<Task> allTasks = searchTargetTasks.getAllList();
 		List<Task> expectedTasks = allTasks.subList(fromIndex, toIndex);
 		
@@ -100,12 +107,6 @@ public class TaskRestControllerTest {
 				.extract().response();
 
 		compareList(expectedTasks, response);
-	}
-	
-	private SearchTargetTasks saveSearchTargetTasks() {
-		SearchTargetTasks searchTargetTasks = new SearchTargetTasks();
-		taskRepository.saveAll(searchTargetTasks.getAllList());
-		return searchTargetTasks;
 	}
 	
 	private void compareList(List<Task> expectedTasks, Response response) {
@@ -122,12 +123,32 @@ public class TaskRestControllerTest {
 	
 	@Test
 	public void 検索絞り込み_0件() throws Exception {
-		saveSearchTargetTasks();
-		
-		get("/api/tasks?keyword=" + URLEncoder.encode("い", "UTF-8"))
+		get("/api/tasks" + getKeywordRequestParam("い"))
 				.then()
 					.statusCode(HttpStatus.OK.value())
 					.body("numberOfElements", is(0));
+	}
+
+	@Test
+	public void 取得() throws Exception {
+		List<Task> tasks = taskRepository.findAll();
+		Task task = tasks.get(0);
+		
+		get("/api/tasks/" + task.getId())
+				.then()
+					.statusCode(HttpStatus.OK.value());
+	}
+
+	@Test
+	public void 取得_該当なし() throws Exception {
+		List<Task> tasks = taskRepository.findAll();
+		Task task = tasks.get(tasks.size() - 1);
+		Integer id = task.getId() + 1;
+
+		get("/api/tasks/" + id)
+				.then()
+					.statusCode(HttpStatus.NOT_FOUND.value())
+					.body(is("Task with id '" + id + "' does not exist."));
 	}
 
 	@Test
@@ -140,9 +161,9 @@ public class TaskRestControllerTest {
 			.when().post("/api/tasks")
 			.then()
 				.statusCode(HttpStatus.CREATED.value())
-				.body("task.id", is(notNullValue()))
-				.body("task.title", is(task.getTitle()))
-				.body("task.detail", is(task.getDetail()));
+				.body("id", is(notNullValue()))
+				.body("title", is(task.getTitle()))
+				.body("detail", is(task.getDetail()));
 	}
 
 	@Test
@@ -155,7 +176,8 @@ public class TaskRestControllerTest {
 			.and()
 			.when().post("/api/tasks")
 			.then()
-				.statusCode(HttpStatus.CONFLICT.value());
+				.statusCode(HttpStatus.CONFLICT.value())
+				.body("message", is("Same task '" + task.toString() + "' already exists."));
 	}
 
 	@Test
@@ -171,9 +193,9 @@ public class TaskRestControllerTest {
 			.when().put("/api/tasks/{id}", created.getId())
 			.then()
 				.statusCode(HttpStatus.OK.value())
-				.body("task.id", is(created.getId()))
-				.body("task.title", is(created.getTitle()))
-				.body("task.detail", is(created.getDetail()));
+				.body("id", is(created.getId()))
+				.body("title", is(created.getTitle()))
+				.body("detail", is(created.getDetail()));
 	}
 
 	@Test
@@ -188,7 +210,8 @@ public class TaskRestControllerTest {
 			.and()
 			.when().put("/api/tasks/{id}", secondTask.getId())
 			.then()
-				.statusCode(HttpStatus.CONFLICT.value());
+				.statusCode(HttpStatus.CONFLICT.value())
+				.body("message", is("Same task '" + firstTask.toString() + "' already exists."));
 	}
 
 	@Test
@@ -199,10 +222,6 @@ public class TaskRestControllerTest {
 		delete("/api/tasks/{id}", created.getId())
 			.then()
 				.statusCode(HttpStatus.NO_CONTENT.value());
-
-		get("/api/tasks/{id}", created.getId())
-			.then()
-				.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 	}
 
 	@Test
@@ -214,6 +233,7 @@ public class TaskRestControllerTest {
 		
 		delete("/api/tasks/{id}", id)
 			.then()
-				.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+				.statusCode(HttpStatus.NOT_FOUND.value())
+				.body(is("Task with id '" + id + "' does not exist."));
 	}
 }

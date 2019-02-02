@@ -1,5 +1,7 @@
 package com.example.todo_list_rest_api.task;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +23,8 @@ public class TaskService {
 		return taskRepository.findByKeyword(pageable, keyword);
 	}
 	
-	public Task getOne(Integer id) {
-		return taskRepository.getOne(id);
+	public Optional<Task> getById(Integer id) {
+		return taskRepository.findById(id);
 	}
 	
 	public Task create(Task task) throws SameTaskExistsException {

@@ -3,8 +3,10 @@ package com.example.todo_list_rest_api.task;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -39,12 +40,14 @@ public class TaskRestController {
 	}
 	
 	@GetMapping(value = "{id}")
-	Task getTask(@PathVariable Integer id) {
-		return taskService.getOne(id);
+	ResponseEntity<?> getTask(@PathVariable Integer id) {
+		Optional<Task> task = taskService.getById(id);
+		if (task.isPresent()) return new ResponseEntity<>(task, HttpStatus.OK);
+		return taskNotFoundResponseEntity(id);
 	}
 	
 	@PostMapping
-	ResponseEntity<ResponseBody> postTask(@RequestBody Task task, UriComponentsBuilder uriBuilder) {
+	ResponseEntity<?> postTask(@RequestBody Task task, UriComponentsBuilder uriBuilder) {
 		
 		Task created = null;
 		HttpHeaders headers = null;
@@ -58,12 +61,11 @@ public class TaskRestController {
 		} catch (SameTaskExistsException e) {
 			return new ResponseEntity<>(new ResponseBody(e.getMessage(), task), HttpStatus.CONFLICT);
 		}
-		return new ResponseEntity<>(new ResponseBody("Task '" + created.toString() + "' is created.", created)
-				, headers, HttpStatus.CREATED);
+		return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
 	}
 	
 	@PutMapping(value = "{id}")
-	ResponseEntity<ResponseBody> putTask(@PathVariable Integer id, @RequestBody Task task) {
+	ResponseEntity<?> putTask(@PathVariable Integer id, @RequestBody Task task) {
 		Task updated = null;
 		try {
 			task.setId(id);
@@ -71,13 +73,20 @@ public class TaskRestController {
 		} catch (SameTaskExistsException e) {
 			return new ResponseEntity<>(new ResponseBody(e.getMessage(), task), HttpStatus.CONFLICT);
 		}
-		return new ResponseEntity<>(new ResponseBody("Task '" + updated.toString() + "' is updated.", updated)
-				, HttpStatus.OK);
+		return new ResponseEntity<>(updated, HttpStatus.OK);
 	}
 	
 	@DeleteMapping(value = "{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	void deleteTask(@PathVariable Integer id) {
-		taskService.delete(id);
+	ResponseEntity<String> deleteTask(@PathVariable Integer id) {
+		try {
+			taskService.delete(id);
+		} catch (EmptyResultDataAccessException e) {
+			return taskNotFoundResponseEntity(id);
+		}
+		return new ResponseEntity<>("Task with id '" + id + "' is deleted.", HttpStatus.NO_CONTENT);
+	}
+	
+	private ResponseEntity<String> taskNotFoundResponseEntity(Integer id) {
+		return new ResponseEntity<>("Task with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
 	}
 }
