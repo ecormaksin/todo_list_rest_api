@@ -26,15 +26,19 @@ public class TaskService {
 	}
 	
 	public Task create(Task task) throws SameTaskExistsException {
-		Task searched = taskRepository.findByAllFields(task.getTitle(), task.getDetail());
-		if (null != searched) {
-			throw new SameTaskExistsException("Same task '" + searched.toString() + "' already exists.");
-		}
+		checkSameTask(task);
 		return taskRepository.save(task);
 	}
 
-	public Task update(Task task) {
+	public Task update(Task task) throws SameTaskExistsException {
+		checkSameTask(task);
 		return taskRepository.save(task);
+	}
+	
+	private void checkSameTask(Task task) throws SameTaskExistsException {
+		Task searched = taskRepository.findByAllFields(task.getTitle(), task.getDetail());
+		if (null == searched) return;
+		throw new SameTaskExistsException("Same task '" + searched.toString() + "' already exists.");
 	}
 	
 	public void delete(Integer id) {

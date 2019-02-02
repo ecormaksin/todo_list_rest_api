@@ -63,9 +63,16 @@ public class TaskRestController {
 	}
 	
 	@PutMapping(value = "{id}")
-	Task putTask(@PathVariable Integer id, @RequestBody Task task) {
-		task.setId(id);
-		return taskService.update(task);
+	ResponseEntity<ResponseBody> putTask(@PathVariable Integer id, @RequestBody Task task) {
+		Task updated = null;
+		try {
+			task.setId(id);
+			updated = taskService.update(task);
+		} catch (SameTaskExistsException e) {
+			return new ResponseEntity<>(new ResponseBody(e.getMessage(), task), HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<>(new ResponseBody("Task '" + updated.toString() + "' is updated.", updated)
+				, HttpStatus.OK);
 	}
 	
 	@DeleteMapping(value = "{id}")

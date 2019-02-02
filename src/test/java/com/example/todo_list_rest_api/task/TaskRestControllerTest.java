@@ -171,9 +171,24 @@ public class TaskRestControllerTest {
 			.when().put("/api/tasks/{id}", created.getId())
 			.then()
 				.statusCode(HttpStatus.OK.value())
-				.body("id", is(created.getId()))
-				.body("title", is(created.getTitle()))
-				.body("detail", is(created.getDetail()));
+				.body("task.id", is(created.getId()))
+				.body("task.title", is(created.getTitle()))
+				.body("task.detail", is(created.getDetail()));
+	}
+
+	@Test
+	public void 更新_他のタスクのタイトルと内容と同じ場合はエラー() throws Exception {
+		Task firstTask = taskRepository.save(new Task("追加テストタイトル", "追加テスト内容"));
+		Task secondTask = taskRepository.save(new Task("更新テストタイトル", "更新テスト内容"));
+		secondTask.setTitle(firstTask.getTitle());
+		secondTask.setDetail(firstTask.getDetail());
+		
+		given().body(secondTask)
+			.contentType(ContentType.JSON)
+			.and()
+			.when().put("/api/tasks/{id}", secondTask.getId())
+			.then()
+				.statusCode(HttpStatus.CONFLICT.value());
 	}
 
 	@Test
