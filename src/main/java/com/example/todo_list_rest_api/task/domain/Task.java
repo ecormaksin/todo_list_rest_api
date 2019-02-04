@@ -12,26 +12,32 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@ApiModel(value = "タスク")
 @Entity
-@Table(name = "tasks")
-@NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //https://teratail.com/questions/128905
+@NoArgsConstructor
+@Table(name = "tasks")
 public class Task implements Comparable<Task> {
 	
 	private static final String VALUE_REQUIRED_MESSAGE = " cannot be null or empty.";
 	
+	@ApiModelProperty(value = "ID（自動採番）", position = 1)
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Getter
 	@Setter
 	private Integer id;
+	@ApiModelProperty(value = "タイトル", required = true, position = 2)
 	@Column(nullable = false)
 	@Getter
 	private String title;
+	@ApiModelProperty(value = "内容", required = true, position = 3)
 	@Column(nullable = false)
 	@Getter
 	private String detail;

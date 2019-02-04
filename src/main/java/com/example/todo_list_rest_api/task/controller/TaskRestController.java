@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -28,30 +29,69 @@ import com.example.todo_list_rest_api.task.domain.Task;
 import com.example.todo_list_rest_api.task.exception.SameTaskExistsException;
 import com.example.todo_list_rest_api.task.service.TaskService;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 @RestController
-@RequestMapping("api/tasks")
+@RequestMapping("/api/tasks")
 public class TaskRestController {
 
 	@Autowired
 	TaskService taskService;
 
 	@GetMapping
+	@ApiOperation(
+			value = "複数のタスクを取得します。"
+			, notes = "キーワードによる絞り込みが可能です。</br>パラメーターの指定がない場合はタイトルの昇順、内容の昇順で並べ替えた先頭の20件を取得します。"
+			)
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "size", value = "取得する件数です。（初期値は20）", required = false, dataType = "int", paramType = "query")
+	    , @ApiImplicitParam(name = "page", value = "ページネーションの考え方で○ページ目を取得するかを指定します。</br>指定した数値−1ページ目のデータを取得します。(初期値は0＝1ページ目)", required = false, dataType = "int", paramType = "query")
+	    , @ApiImplicitParam(name = "sort", value = "ソートキーを配列で指定します。", required = false, dataType = "string", paramType = "query")
+	    })
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, response = Page.class, message = "")
+	})
 	Page<Task> getTasks(@PageableDefault(size=20) Pageable pageable
-			, @RequestParam(required=false) String keyword) throws UnsupportedEncodingException {
+			, @ApiParam(
+					name = "keyword"
+					, value = "検索時のキーワードです。</br>指定した場合はタイトル・内容のいずれかに部分一致するタスクに絞り込まれます。"
+					, required = false)
+			@RequestParam(required=false) String keyword) throws UnsupportedEncodingException {
 		if (null == keyword) return taskService.findAll(pageable);
-		String decodedKeyword = URLDecoder.decode(keyword, "UTF-8");;
+		String decodedKeyword = URLDecoder.decode(keyword, "UTF-8");
 		return taskService.findByKeyword(pageable, decodedKeyword);
 	}
 	
 	@GetMapping(value = "{id}")
-	ResponseEntity<?> getTask(@PathVariable Integer id) {
+	@ApiOperation(
+			value = "パスに指定したIDのタスクを取得します。"
+			, notes = "存在した場合は該当のタスクを返却します。存在しない場合はエラーメッセージを返却します。"
+			)
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, response = Task.class, message = "")
+			, @ApiResponse(code = 404, response = String.class, message = "Task with id '{id}' does not exist.")
+	})
+	ResponseEntity<?> getTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id) {
 		Optional<Task> task = taskService.getById(id);
 		if (task.isPresent()) return new ResponseEntity<>(task, HttpStatus.OK);
 		return taskNotFoundResponseEntity(id);
 	}
 	
 	@PostMapping
-	ResponseEntity<?> postTask(@RequestBody Task task, UriComponentsBuilder uriBuilder) {
+	@ApiOperation(
+			value = "タスクを新規登録します。"
+			, notes = "タイトルと内容が同じタスクが既に登録されている場合はエラーメッセージを返却します。"
+			)
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, response = Task.class, message = "")
+			, @ApiResponse(code = 409, response = String.class, message = "Same task 'id: {id}, title: {title}, detail: {detail}' already exists.")
+	})
+	ResponseEntity<?> postTask(@ApiParam(value = "タスク", required = true) @RequestBody Task task, UriComponentsBuilder uriBuilder) {
 		
 		Task created = null;
 		HttpHeaders headers = null;
@@ -69,7 +109,16 @@ public class TaskRestController {
 	}
 	
 	@PutMapping(value = "{id}")
-	ResponseEntity<?> putTask(@PathVariable Integer id, @RequestBody Task task) {
+	@ApiOperation(
+			value = "指定したIDのタスクを更新します。"
+			, notes = "タイトルと内容が同じタスクが既に登録されている場合はエラーメッセージを返却します。"
+			)
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, response = Task.class, message = "")
+			, @ApiResponse(code = 409, response = String.class, message = "Same task 'id: {id}, title: {title}, detail: {detail}' already exists.")
+	})
+	ResponseEntity<?> putTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id
+			, @ApiParam(value = "タスク", required = true) @RequestBody Task task) {
 		Task updated = null;
 		try {
 			task.setId(id);
@@ -81,13 +130,22 @@ public class TaskRestController {
 	}
 	
 	@DeleteMapping(value = "{id}")
-	ResponseEntity<String> deleteTask(@PathVariable Integer id) {
+	@ApiOperation(
+			value = "パスに指定したIDのタスクを削除します。"
+			, notes = "存在した場合は該当のタスクを削除します。存在しない場合はエラーメッセージを返却します。"
+			)
+	@ApiResponses(value = {
+			@ApiResponse(code = 204, response = String.class, message = "")
+			, @ApiResponse(code = 404, response = String.class, message = "Task with id '{id}' does not exist.")
+	})
+	@ResponseStatus(HttpStatus.NO_CONTENT) // https://github.com/springfox/springfox/issues/908
+	ResponseEntity<?> deleteTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id) {
 		try {
 			taskService.delete(id);
 		} catch (EmptyResultDataAccessException e) {
 			return taskNotFoundResponseEntity(id);
 		}
-		return new ResponseEntity<>("Task with id '" + id + "' is deleted.", HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 	
 	private ResponseEntity<String> taskNotFoundResponseEntity(Integer id) {

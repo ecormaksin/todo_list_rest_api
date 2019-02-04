@@ -17,6 +17,4 @@ public class TodoListRestApiApplication implements CommandLineRunner {
 	public static void main(String[] args) {
 		SpringApplication.run(TodoListRestApiApplication.class, args);
 	}
-
 }
-

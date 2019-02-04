@@ -14,6 +14,14 @@
 	<name>todo_list_rest_api</name>
 	<description>ToDoリストREST API</description>
 
+	<repositories>
+	    <repository>
+	      <id>jcenter-snapshots</id>
+	      <name>jcenter</name>
+	      <url>https://jcenter.bintray.com/</url>
+	    </repository>
+	</repositories>
+
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
@@ -26,6 +34,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 		<!-- 参考URL https://qiita.com/ksby/items/7a2cb97215b252bf41b1 -->
 		<dependency>
@@ -59,6 +71,21 @@
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-lang3</artifactId>
 		</dependency>
+		<dependency>
+		    <groupId>io.springfox</groupId>
+		    <artifactId>springfox-swagger2</artifactId>
+		    <version>2.9.2</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.springfox</groupId>
+		    <artifactId>springfox-swagger-ui</artifactId>
+		    <version>2.9.2</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.springfox</groupId>
+		    <artifactId>springfox-core</artifactId>
+		    <version>2.9.2</version>
+		</dependency>		
 		<!-- https://mvnrepository.com/artifact/io.rest-assured/rest-assured -->
 		<dependency>
 		    <groupId>io.rest-assured</groupId>
