@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,7 +52,8 @@ public class TaskRestController {
 	@ApiImplicitParams({
 	    @ApiImplicitParam(name = "size", value = "取得する件数です。（初期値は20）", required = false, dataType = "int", paramType = "query")
 	    , @ApiImplicitParam(name = "page", value = "ページネーションの考え方で○ページ目を取得するかを指定します。</br>指定した数値−1ページ目のデータを取得します。(初期値は0＝1ページ目)", required = false, dataType = "int", paramType = "query")
-	    , @ApiImplicitParam(name = "sort", value = "ソートキーを配列で指定します。", required = false, dataType = "string", paramType = "query")
+	    , @ApiImplicitParam(name = "sort", value = "ソートキーを配列で指定します。", required = false, allowMultiple = true, dataType = "string", paramType = "query")
+	    , @ApiImplicitParam(name = "direction", value = "ソート順を指定します。（昇順：Direction.ASC、降順：Direction.DESC）", required = false, dataTypeClass = Direction.class, paramType = "query")
 	    })
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, response = Page.class, message = "")

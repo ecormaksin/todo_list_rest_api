@@ -3,12 +3,19 @@ package com.example.todo_list_rest_api;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import com.example.todo_list_rest_api.swagger.ApiModelPage;
+import com.example.todo_list_rest_api.task.domain.Task;
+import com.fasterxml.classmate.TypeResolver;
 
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.schema.AlternateTypeRules;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -23,11 +30,20 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 public class Swagger2Config {
 
+	@Autowired
+	private TypeResolver typeResolver;
+	  
     @Bean
     public Docket swaggerSpringMvcPlugin() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("todo-api")
             	.ignoredParameterTypes(Pageable.class) // https://github.com/springfox/springfox/issues/1139
+            	.genericModelSubstitutes(Page.class)
+            	.alternateTypeRules(
+            			AlternateTypeRules.newRule(typeResolver.resolve(Page.class,
+            	                typeResolver.resolve(Page.class, Task.class)),
+            	                typeResolver.resolve(Task.class)))
+            	.directModelSubstitute(Page.class, ApiModelPage.class)
             	.produces(produces())
         		.select()
                 	.paths(PathSelectors.regex("/api/tasks.*"))
