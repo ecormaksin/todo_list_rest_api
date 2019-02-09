@@ -27,10 +27,17 @@ import lombok.Setter;
 public class Task implements Comparable<Task> {
 	
 	public static final int TITLE_MAX_LENGTH = 255;
-
+	public static final int DETAIL_MAX_BYTES = 1 /*GB*/ 
+			* 1024 /*MB*/ 
+			* 1024 /*KB*/ 
+			* 1024 /*Byte*/;
+	
 	private static final String TITLE_NAME = "Title";
 	private static final String ERROR_MESSAGE_TITLE_REQUIRED = TITLE_NAME + " cannot be null or empty.";
 	private static final String ERROR_MESSAGE_TITLE_LENGTH_OVER = TITLE_NAME + "'s length must be less than equals " + TITLE_MAX_LENGTH + " characters.";
+	
+	private static final String DETAIL_NAME = "Detail";
+	private static final String ERROR_MESSAGE_DETAIL_SIZE_OVER = DETAIL_NAME + "'s size must be less than equals " + DETAIL_MAX_BYTES + " bytes.";
 	
 	@ApiModelProperty(value = "ID（自動採番）", position = 1)
 	@Id
@@ -38,12 +45,12 @@ public class Task implements Comparable<Task> {
 	@Getter
 	@Setter
 	private Integer id;
-	@ApiModelProperty(value = "タイトル（255文字以内）", required = true, position = 2)
+	@ApiModelProperty(value = "タイトル（必須、255文字以内）", required = true, position = 2)
 	@Column(nullable = false)
 	@Lob
 	@Getter
 	private String title;
-	@ApiModelProperty(value = "内容", required = false, position = 3)
+	@ApiModelProperty(value = "内容（任意、文字数制限は1GB(4バイト文字だと268,435,456文字)以内）", required = false, position = 3)
 	@Column(nullable = true)
 	@Getter
 	@Setter
@@ -64,13 +71,25 @@ public class Task implements Comparable<Task> {
 		this.title = title;
 	}
 	
-	private void checkTitle(String value) throws Exception {
-		if("".equals(StringUtils.defaultString(value))) {
+	public void setDetail(String detail) throws Exception {
+		checkDetail(detail);
+		this.detail = detail;
+	}
+	
+	private void checkTitle(String title) throws Exception {
+		if("".equals(StringUtils.defaultString(title))) {
 			throw new IllegalArgumentException(ERROR_MESSAGE_TITLE_REQUIRED);
 		}
-		if (TITLE_MAX_LENGTH < value.length()) {
+		if (TITLE_MAX_LENGTH < title.length()) {
 			throw new IllegalArgumentException(ERROR_MESSAGE_TITLE_LENGTH_OVER);
 		}
+	}
+	
+	private void checkDetail(String detail) throws Exception {
+		if (DETAIL_MAX_BYTES >= detail.getBytes("UTF-8").length) {
+			return;
+		}
+		throw new IllegalArgumentException(ERROR_MESSAGE_DETAIL_SIZE_OVER);
 	}
 	
 	@Override

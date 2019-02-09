@@ -8,12 +8,9 @@ import org.junit.rules.ExpectedException;
 public class TaskTest {
 
 	String titleMaxLengthValue = StringUtils.repeat("a", Task.TITLE_MAX_LENGTH);
-	String titleLengthOverValue = StringUtils.repeat("b", Task.TITLE_MAX_LENGTH + 1);
-	String detailMaxValue = StringUtils.repeat("あ"
-			, (1 /*GB*/ 
-					* 1024 /*MB*/ 
-					* 1024 /*KB*/ 
-					* 1024 /*Byte*/) / 3 );
+	String titleLengthOverValue = titleMaxLengthValue + "a";
+	String detailMaxValue = StringUtils.repeat("あ", Task.DETAIL_MAX_BYTES / 3 );
+	String detailBytesOverValue = detailMaxValue + "a";
 	
 	@Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -29,7 +26,7 @@ public class TaskTest {
 	}
 
 	@Test
-	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容はおよそ1GB() throws Exception {
+	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容は1GB() throws Exception {
 		new Task(titleMaxLengthValue, detailMaxValue);
 	}
 
@@ -52,5 +49,12 @@ public class TaskTest {
 		expectedException.expect(IllegalArgumentException.class);
 		expectedException.expectMessage("Title's length must be less than equals 255 characters.");
 		new Task(titleLengthOverValue, detailMaxValue);
+	}
+
+	@Test
+	public void 内容が1GBを超えている時はIllegalArgumentExceptionが発生する() throws Exception {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("Detail's size must be less than equals 1073741824 bytes.");
+		new Task(titleMaxLengthValue, detailBytesOverValue);
 	}
 }
