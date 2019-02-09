@@ -15,8 +15,8 @@ public class ApiModelPageable {
 	private int pageSize;
 	@ApiModelProperty(value = "ページ番号（0始まり）", position = 4)
 	private int pageNumber;
-	@ApiModelProperty(value = "★要確認", position = 5)
+	@ApiModelProperty(value = "現状のPageableにページネーション情報が含まれている場合はtrue、それ以外はfalse", position = 5)
 	private boolean paged;
-	@ApiModelProperty(value = "★要確認", position = 6)
+	@ApiModelProperty(value = "現状のPageableにページネーション情報が含まれていない場合はtrue、それ以外はfalse ", position = 6)
 	private boolean unpaged;
 }

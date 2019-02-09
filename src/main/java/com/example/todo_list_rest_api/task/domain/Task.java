@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -25,7 +26,11 @@ import lombok.Setter;
 @Table(name = "tasks")
 public class Task implements Comparable<Task> {
 	
-	private static final String VALUE_REQUIRED_MESSAGE = " cannot be null or empty.";
+	public static final int TITLE_MAX_LENGTH = 255;
+
+	private static final String TITLE_NAME = "Title";
+	private static final String ERROR_MESSAGE_TITLE_REQUIRED = TITLE_NAME + " cannot be null or empty.";
+	private static final String ERROR_MESSAGE_TITLE_LENGTH_OVER = TITLE_NAME + "'s length must be less than equals " + TITLE_MAX_LENGTH + " characters.";
 	
 	@ApiModelProperty(value = "ID（自動採番）", position = 1)
 	@Id
@@ -33,37 +38,39 @@ public class Task implements Comparable<Task> {
 	@Getter
 	@Setter
 	private Integer id;
-	@ApiModelProperty(value = "タイトル", required = true, position = 2)
+	@ApiModelProperty(value = "タイトル（255文字以内）", required = true, position = 2)
 	@Column(nullable = false)
+	@Lob
 	@Getter
 	private String title;
-	@ApiModelProperty(value = "内容", required = true, position = 3)
-	@Column(nullable = false)
+	@ApiModelProperty(value = "内容", required = false, position = 3)
+	@Column(nullable = true)
 	@Getter
+	@Setter
 	private String detail;
 	
-	public Task(String title, String detail) {
+	public Task(String title, String detail) throws Exception {
 		this(null, title, detail);
 	}
 
-	public Task(Integer id, String title, String detail) {
+	public Task(Integer id, String title, String detail) throws Exception {
 		this.id = id;
 		setTitle(title);
 		setDetail(detail);
 	}
 	
-	public void setTitle(String title) {
-		if("".equals(StringUtils.defaultString(title))) {
-			throw new IllegalArgumentException("title" + VALUE_REQUIRED_MESSAGE);
-		}
+	public void setTitle(String title) throws Exception {
+		checkTitle(title);
 		this.title = title;
 	}
 	
-	public void setDetail(String detail) {
-		if("".equals(StringUtils.defaultString(detail))) {
-			throw new IllegalArgumentException("detail" + VALUE_REQUIRED_MESSAGE);
+	private void checkTitle(String value) throws Exception {
+		if("".equals(StringUtils.defaultString(value))) {
+			throw new IllegalArgumentException(ERROR_MESSAGE_TITLE_REQUIRED);
 		}
-		this.detail = detail;
+		if (TITLE_MAX_LENGTH < value.length()) {
+			throw new IllegalArgumentException(ERROR_MESSAGE_TITLE_LENGTH_OVER);
+		}
 	}
 	
 	@Override

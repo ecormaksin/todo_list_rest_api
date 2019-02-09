@@ -3,13 +3,10 @@ package com.example.todo_list_rest_api.task.controller;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,7 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.todo_list_rest_api.task.domain.Task;
-import com.example.todo_list_rest_api.task.exception.SameTaskExistsException;
+import com.example.todo_list_rest_api.task.exception.SameIdTaskExistsException;
+import com.example.todo_list_rest_api.task.exception.SamePropertiesTaskExistsException;
+import com.example.todo_list_rest_api.task.exception.TaskNotFoundException;
 import com.example.todo_list_rest_api.task.service.TaskService;
 
 import io.swagger.annotations.ApiImplicitParam;
@@ -51,9 +50,7 @@ public class TaskRestController {
 			)
 	@ApiImplicitParams({
 	    @ApiImplicitParam(name = "size", value = "取得する件数です。（初期値は20）", required = false, dataType = "int", paramType = "query")
-	    , @ApiImplicitParam(name = "page", value = "ページネーションの考え方で○ページ目を取得するかを指定します。</br>指定した数値−1ページ目のデータを取得します。(初期値は0＝1ページ目)", required = false, dataType = "int", paramType = "query")
-	    , @ApiImplicitParam(name = "sort", value = "ソートキーを配列で指定します。", required = false, allowMultiple = true, dataType = "string", paramType = "query")
-	    , @ApiImplicitParam(name = "direction", value = "ソート順を指定します。（昇順：Direction.ASC、降順：Direction.DESC）", required = false, dataTypeClass = Direction.class, paramType = "query")
+	    , @ApiImplicitParam(name = "page", value = "ページネーションの考え方で○ページ目を取得するかを指定します。</br>取得したいページー1の数値を指定します。(初期値は0＝1ページ目)", required = false, dataType = "int", paramType = "query")
 	    })
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, response = Page.class, message = "")
@@ -61,7 +58,7 @@ public class TaskRestController {
 	Page<Task> getTasks(@PageableDefault(size=20) Pageable pageable
 			, @ApiParam(
 					name = "keyword"
-					, value = "検索時のキーワードです。</br>指定した場合はタイトル・内容のいずれかに部分一致するタスクに絞り込まれます。"
+					, value = "検索時のキーワードです。</br>指定した場合はタイトル・内容のいずれかに部分一致するタスクに絞り込まれます。</br>curlなどコマンドから実行する場合はURLエンコードした文字列を渡す必要があります。"
 					, required = false)
 			@RequestParam(required=false) String keyword) throws UnsupportedEncodingException {
 		if (null == keyword) return taskService.findAll(pageable);
@@ -76,22 +73,26 @@ public class TaskRestController {
 			)
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, response = Task.class, message = "")
-			, @ApiResponse(code = 404, response = String.class, message = "Task with id '{id}' does not exist.")
+			, @ApiResponse(code = 404, response = ResponseBodyOnlyMessage.class, message = "Task with id({id}) does not exist.")
 	})
 	ResponseEntity<?> getTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id) {
-		Optional<Task> task = taskService.getById(id);
-		if (task.isPresent()) return new ResponseEntity<>(task, HttpStatus.OK);
-		return taskNotFoundResponseEntity(id);
+		Task task;
+		try {
+			task = taskService.getById(id);
+			return new ResponseEntity<>(task, HttpStatus.OK);
+		} catch (TaskNotFoundException e) {
+			return taskNotFoundResponseEntity(e);
+		}
 	}
 	
 	@PostMapping
 	@ApiOperation(
 			value = "タスクを新規登録します。"
-			, notes = "タイトルと内容が同じタスクが既に登録されている場合はエラーメッセージを返却します。"
+			, notes = "IDが同じ、またはタイトルと内容が同じタスクが既に登録されている場合はエラーメッセージを返却します。"
 			)
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, response = Task.class, message = "")
-			, @ApiResponse(code = 409, response = String.class, message = "Same task 'id: {id}, title: {title}, detail: {detail}' already exists.")
+			, @ApiResponse(code = 409, response = ResponseBodyWithTask.class, message = "Task with same [id | properties](id: {id}, title: {title}, detail: {detail}) already exists.")
 	})
 	ResponseEntity<?> postTask(@ApiParam(value = "タスク", required = true) @RequestBody Task task, UriComponentsBuilder uriBuilder) {
 		
@@ -104,8 +105,9 @@ public class TaskRestController {
 					.buildAndExpand(created.getId()).toUri();
 			headers = new HttpHeaders();
 			headers.setLocation(location);
-		} catch (SameTaskExistsException e) {
-			return new ResponseEntity<>(new ResponseBody(e.getMessage(), task), HttpStatus.CONFLICT);
+		} catch (SameIdTaskExistsException 
+				| SamePropertiesTaskExistsException e) {
+			return new ResponseEntity<>(new ResponseBodyWithTask(e.getMessage(), task), HttpStatus.CONFLICT);
 		}
 		return new ResponseEntity<>(created, headers, HttpStatus.CREATED);
 	}
@@ -113,11 +115,12 @@ public class TaskRestController {
 	@PutMapping(value = "{id}")
 	@ApiOperation(
 			value = "指定したIDのタスクを更新します。"
-			, notes = "タイトルと内容が同じタスクが既に登録されている場合はエラーメッセージを返却します。"
+			, notes = "タスクが存在しない、またはタイトルと内容が同じタスクが既に登録されている場合はエラーメッセージを返却します。"
 			)
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, response = Task.class, message = "")
-			, @ApiResponse(code = 409, response = String.class, message = "Same task 'id: {id}, title: {title}, detail: {detail}' already exists.")
+			, @ApiResponse(code = 404, response = ResponseBodyOnlyMessage.class, message = "Task with id({id}) does not exist.")
+			, @ApiResponse(code = 409, response = ResponseBodyWithTask.class, message = "Task with same properties(id: {id}, title: {title}, detail: {detail}) already exists.")
 	})
 	ResponseEntity<?> putTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id
 			, @ApiParam(value = "タスク", required = true) @RequestBody Task task) {
@@ -125,8 +128,10 @@ public class TaskRestController {
 		try {
 			task.setId(id);
 			updated = taskService.update(task);
-		} catch (SameTaskExistsException e) {
-			return new ResponseEntity<>(new ResponseBody(e.getMessage(), task), HttpStatus.CONFLICT);
+		} catch (TaskNotFoundException e) {
+			return taskNotFoundResponseEntity(e);
+		} catch (SamePropertiesTaskExistsException e) {
+			return new ResponseEntity<>(new ResponseBodyWithTask(e.getMessage(), task), HttpStatus.CONFLICT);
 		}
 		return new ResponseEntity<>(updated, HttpStatus.OK);
 	}
@@ -138,19 +143,19 @@ public class TaskRestController {
 			)
 	@ApiResponses(value = {
 			@ApiResponse(code = 204, response = String.class, message = "")
-			, @ApiResponse(code = 404, response = String.class, message = "Task with id '{id}' does not exist.")
+			, @ApiResponse(code = 404, response = ResponseBodyOnlyMessage.class, message = "Task with id({id}) does not exist.")
 	})
 	@ResponseStatus(HttpStatus.NO_CONTENT) // https://github.com/springfox/springfox/issues/908
 	ResponseEntity<?> deleteTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id) {
 		try {
 			taskService.delete(id);
-		} catch (EmptyResultDataAccessException e) {
-			return taskNotFoundResponseEntity(id);
+		} catch (TaskNotFoundException e) {
+			return taskNotFoundResponseEntity(e);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 	
-	private ResponseEntity<String> taskNotFoundResponseEntity(Integer id) {
-		return new ResponseEntity<>("Task with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
+	private ResponseEntity<ResponseBodyOnlyMessage> taskNotFoundResponseEntity(TaskNotFoundException e) {
+		return new ResponseEntity<>(new ResponseBodyOnlyMessage(e.getMessage()), HttpStatus.NOT_FOUND);
 	}
 }

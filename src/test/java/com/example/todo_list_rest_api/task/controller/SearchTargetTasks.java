@@ -7,8 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import com.example.todo_list_rest_api.task.domain.Task;
 
+@Component
 public class SearchTargetTasks {
 
 	enum SearchTarget {
@@ -21,7 +26,8 @@ public class SearchTargetTasks {
 	Map<Task, Task> includedMap = new TreeMap<>();
 	Map<Task, Task> excludedMap = new TreeMap<>();
 	
-	{
+	@PostConstruct
+	public void setUp() throws Exception {
 		allocationMap.put(SearchTarget.INCLUDED, includedMap);
 		allocationMap.put(SearchTarget.EXCLUDED, excludedMap);
 		
@@ -46,11 +52,11 @@ public class SearchTargetTasks {
 		allTaskMap.putAll(excludedMap);
 	}
 	
-	private void setData(String title, String detail) {
+	private void setData(String title, String detail) throws Exception {
 		setData(title, detail, SearchTarget.INCLUDED);
 	}
 	
-	private void setData(String title, String detail, SearchTarget searchTarget) {
+	private void setData(String title, String detail, SearchTarget searchTarget) throws Exception {
 		Task task = new Task(title, detail);
 		Map<Task, Task> target = allocationMap.get(searchTarget);
 		target.put(task, task);

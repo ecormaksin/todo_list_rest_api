@@ -1,36 +1,56 @@
 package com.example.todo_list_rest_api.task.domain;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Rule;
 import org.junit.Test;
-
-import com.example.todo_list_rest_api.task.domain.Task;
+import org.junit.rules.ExpectedException;
 
 public class TaskTest {
 
-	String title = "タイトルテスト";
-	String detail = "内容テスト";
+	String titleMaxLengthValue = StringUtils.repeat("a", Task.TITLE_MAX_LENGTH);
+	String titleLengthOverValue = StringUtils.repeat("b", Task.TITLE_MAX_LENGTH + 1);
+	String detailMaxValue = StringUtils.repeat("あ"
+			, (1 /*GB*/ 
+					* 1024 /*MB*/ 
+					* 1024 /*KB*/ 
+					* 1024 /*Byte*/) / 3 );
+	
+	@Rule
+    public ExpectedException expectedException = ExpectedException.none();
 	
 	@Test
-	public void testタイトルと内容に値が設定されている時は例外が発生しない() {
-		new Task(title, detail);
+	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容はNULL() throws Exception {
+		new Task(titleMaxLengthValue, null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testタイトルがNULLの時はIllegalArgumentExceptionが発生する() {
-		new Task(null, detail);
+	@Test
+	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容は長さ0() throws Exception {
+		new Task(titleMaxLengthValue, "");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testタイトルが長さ0の時はIllegalArgumentExceptionが発生する() {
-		new Task("", detail);
+	@Test
+	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容はおよそ1GB() throws Exception {
+		new Task(titleMaxLengthValue, detailMaxValue);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void test内容がNULLの時はIllegalArgumentExceptionが発生する() {
-		new Task(title, null);
+	@Test
+	public void タイトルがNULLの時はIllegalArgumentExceptionが発生する() throws Exception {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("Title cannot be null or empty.");
+		new Task(null, detailMaxValue);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void test内容が長さ0の時はIllegalArgumentExceptionが発生する() {
-		new Task(title, "");
+	@Test
+	public void タイトルが長さ0の時はIllegalArgumentExceptionが発生する() throws Exception {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("Title cannot be null or empty.");
+		new Task("", detailMaxValue);
+	}
+
+	@Test
+	public void タイトルが255文字を超えている時はIllegalArgumentExceptionが発生する() throws Exception {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("Title's length must be less than equals 255 characters.");
+		new Task(titleLengthOverValue, detailMaxValue);
 	}
 }
