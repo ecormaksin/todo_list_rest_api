@@ -6,6 +6,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,8 +39,10 @@ public class Task implements Comparable<Task> {
 	@Getter
 	@Setter
 	private Integer id;
-	@ApiModelProperty(value = "タイトル（必須、255文字以内）", required = true, position = 2)
+	@ApiModelProperty(value = "タイトル（必須、255文字以内）", position = 2)
 	@Column(nullable = false)
+	@NotBlank
+	@Size(min = 1, max = 255)
 	@Getter
 	private String title;
 	@ApiModelProperty(value = "内容（任意、文字数制限は1GB(4バイト文字だと268,435,456文字)以内）", required = false, position = 3)

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.example.todo_list_rest_api.swagger.ApiModelPage;
 import com.example.todo_list_rest_api.task.domain.Task;
 import com.fasterxml.classmate.TypeResolver;
 
@@ -43,7 +42,8 @@ public class Swagger2Config {
             			AlternateTypeRules.newRule(typeResolver.resolve(Page.class,
             	                typeResolver.resolve(Page.class, Task.class)),
             	                typeResolver.resolve(Task.class)))
-            	.directModelSubstitute(Page.class, ApiModelPage.class)
+//            	.directModelSubstitute(Pageable.class, ApiModelPageable.class)
+//            	.directModelSubstitute(Page.class, ApiModelPage.class)
             	.produces(produces())
         		.select()
                 	.paths(PathSelectors.regex("/api/tasks.*"))
