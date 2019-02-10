@@ -43,7 +43,6 @@ public class Swagger2Config {
             			AlternateTypeRules.newRule(typeResolver.resolve(Page.class, 
             	                typeResolver.resolve(Page.class, Task.class)),
             	                typeResolver.resolve(Task.class)))
-//            	.directModelSubstitute(Pageable.class, ApiModelPageable.class)
             	.directModelSubstitute(Page.class, ApiModelPage.class)
             	.produces(produces())
         		.select()

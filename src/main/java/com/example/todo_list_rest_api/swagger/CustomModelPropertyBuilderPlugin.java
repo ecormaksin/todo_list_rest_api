@@ -22,7 +22,6 @@ import springfox.documentation.spi.schema.ModelPropertyBuilderPlugin;
 import springfox.documentation.spi.schema.contexts.ModelPropertyContext;
 
 @Component
-//@Order(SwaggerPluginSupport.SWAGGER_PLUGIN_ORDER)
 public class CustomModelPropertyBuilderPlugin implements ModelPropertyBuilderPlugin {
 
 	@Override
