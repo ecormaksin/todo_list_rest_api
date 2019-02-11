@@ -168,7 +168,7 @@ public class TaskRestControllerTest {
 
 	@Test
 	public void 登録() throws Exception {
-		Task task = new Task("追加テストタイトル", "追加テスト内容");
+		Task task = Task.createWithoutId("追加テストタイトル", "追加テスト内容");
 		
 		given().body(task)
 			.contentType(ContentType.JSON)
@@ -198,7 +198,7 @@ public class TaskRestControllerTest {
 	@Test
 	public void 登録_同タイトル同内容がすでに登録されていた場合はエラー() throws Exception {
 		Task created = createTask();
-		Task newTask = new Task(created.getTitle(), created.getDetail());
+		Task newTask = Task.createWithoutId(created.getTitle(), created.getDetail());
 		
 		given().body(newTask)
 			.contentType(ContentType.JSON)
@@ -229,7 +229,7 @@ public class TaskRestControllerTest {
 	@Test
 	public void 更新_他のタスクのタイトルと内容と同じ場合はエラー() throws Exception {
 		Task firstTask = createTask();
-		Task secondTask = taskRepository.save(new Task("更新テストタイトル", "更新テスト内容"));
+		Task secondTask = taskRepository.save(Task.createWithoutId("更新テストタイトル", "更新テスト内容"));
 		secondTask.setTitle(firstTask.getTitle());
 		secondTask.setDetail(firstTask.getDetail());
 		
@@ -279,6 +279,6 @@ public class TaskRestControllerTest {
 	}
 	
 	private Task createTask() throws Exception {
-		return taskRepository.save(new Task("テストタイトル", "テスト内容"));
+		return taskRepository.save(Task.createWithoutId("テストタイトル", "テスト内容"));
 	}
 }

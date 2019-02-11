@@ -75,7 +75,9 @@ public class TaskRestController {
 			@ApiResponse(code = 200, response = Task.class, message = "")
 			, @ApiResponse(code = 404, response = ResponseBodyOnlyMessage.class, message = "Task with id({id}) does not exist.")
 	})
-	ResponseEntity<?> getTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id) {
+	ResponseEntity<?> getTask(
+			@ApiParam(value = "タスクID", required = true) 
+			@PathVariable Integer id) {
 		Task task;
 		try {
 			task = taskService.getById(id);
@@ -94,7 +96,10 @@ public class TaskRestController {
 			@ApiResponse(code = 200, response = Task.class, message = "")
 			, @ApiResponse(code = 409, response = ResponseBodyWithTask.class, message = "Task with same [id | properties](id: {id}, title: {title}, detail: {detail}) already exists.")
 	})
-	ResponseEntity<?> postTask(@ApiParam(value = "タスク", required = true) @RequestBody Task task, UriComponentsBuilder uriBuilder) {
+	ResponseEntity<?> postTask(
+			@ApiParam(value = "タスク", required = true) 
+			@RequestBody Task task
+			, UriComponentsBuilder uriBuilder) {
 		
 		Task created = null;
 		HttpHeaders headers = null;
@@ -122,8 +127,11 @@ public class TaskRestController {
 			, @ApiResponse(code = 404, response = ResponseBodyOnlyMessage.class, message = "Task with id({id}) does not exist.")
 			, @ApiResponse(code = 409, response = ResponseBodyWithTask.class, message = "Task with same properties(id: {id}, title: {title}, detail: {detail}) already exists.")
 	})
-	ResponseEntity<?> putTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id
-			, @ApiParam(value = "タスク", required = true) @RequestBody Task task) {
+	ResponseEntity<?> putTask(
+			@ApiParam(value = "タスクID", required = true) 
+			@PathVariable Integer id
+			, @ApiParam(value = "タスク", required = true) 
+			@RequestBody Task task) {
 		Task updated = null;
 		try {
 			task.setId(id);
@@ -146,7 +154,9 @@ public class TaskRestController {
 			, @ApiResponse(code = 404, response = ResponseBodyOnlyMessage.class, message = "Task with id({id}) does not exist.")
 	})
 	@ResponseStatus(HttpStatus.NO_CONTENT) // https://github.com/springfox/springfox/issues/908
-	ResponseEntity<?> deleteTask(@ApiParam(value = "タスクID", required = true) @PathVariable Integer id) {
+	ResponseEntity<?> deleteTask(
+			@ApiParam(value = "タスクID", required = true) 
+			@PathVariable Integer id) {
 		try {
 			taskService.delete(id);
 		} catch (TaskNotFoundException e) {

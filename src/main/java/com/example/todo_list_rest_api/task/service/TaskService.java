@@ -1,7 +1,5 @@
 package com.example.todo_list_rest_api.task.service;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,44 +30,58 @@ public class TaskService {
 		return taskRepository.findByKeyword(pageable, keyword);
 	}
 	
-	public Task getById(Integer id) throws TaskNotFoundException {
-		Optional<Task> searched = null;
-		if (null != id) searched = taskRepository.findById(id);
-		if (null != searched && searched.isPresent()) return searched.get();
-		throw new TaskNotFoundException(messageService.get("error.task.not.exist", new Object[] {id}));
+	public Task getById(Integer id) {
+		if (null == id) return null;
+		return taskRepository.findById(id)
+				.orElseThrow(
+						() -> new TaskNotFoundException(
+								messageService.get("error.task.not.exist", new Object[] {id})
+								)
+						);
+	}
+	
+	enum DoInsert {
+		NO, YES;
 	}
 	
 	@Transactional(readOnly = false)
-	public Task create(Task task) throws SameIdTaskExistsException, SamePropertiesTaskExistsException {
+	public Task create(Task task){
 		Integer id = task.getId();
 		Task searched = null;
+		DoInsert doInsert = DoInsert.NO;
 		try {
 			searched = getById(id);
+			if (null == searched) doInsert = DoInsert.YES;
 		} catch (TaskNotFoundException e) {
-			return saveTask(task);
+			doInsert = DoInsert.YES;
 		}
-		throw new SameIdTaskExistsException(messageService.get("error.task.same.id.exists", new Object[] {searched.toString()}));
+		if (doInsert == DoInsert.YES) return saveTask(task);
+		throw new SameIdTaskExistsException(
+				messageService.get("error.task.same.id.exists", new Object[] {searched.toString()})
+				);
 	}
 	
 	@Transactional(readOnly = false)
-	public Task update(Task task) throws TaskNotFoundException, SamePropertiesTaskExistsException {
+	public Task update(Task task) {
 		getById(task.getId());
 		return saveTask(task);
 	}
 	
-	private Task saveTask(Task task) throws SamePropertiesTaskExistsException {
+	private Task saveTask(Task task) {
 		checkSamePropertiesTask(task);
 		return taskRepository.save(task);
 	}
 	
-	private void checkSamePropertiesTask(Task task) throws SamePropertiesTaskExistsException {
+	private void checkSamePropertiesTask(Task task) {
 		Task searched = taskRepository.findByAllFields(task.getTitle(), task.getDetail());
 		if (null == searched) return;
-		throw new SamePropertiesTaskExistsException(messageService.get("error.task.same.properties.exists", new Object[] {searched.toString()}));
+		throw new SamePropertiesTaskExistsException(
+				messageService.get("error.task.same.properties.exists", new Object[] {searched.toString()})
+				);
 	}
 	
 	@Transactional(readOnly = false)
-	public void delete(Integer id) throws TaskNotFoundException {
+	public void delete(Integer id) {
 		getById(id);
 		taskRepository.deleteById(id);
 	}

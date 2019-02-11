@@ -16,37 +16,51 @@ public class TaskTest {
 	
 	@Test
 	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容はNULL() throws Exception {
-		new Task(titleMaxLengthValue, null);
+		Task.createWithoutId(titleMaxLengthValue, null);
 	}
 
 	@Test
 	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容は長さ0() throws Exception {
-		new Task(titleMaxLengthValue, "");
+		Task.createWithoutId(titleMaxLengthValue, "");
 	}
 
 	@Test
 	public void タイトルに上限文字数の値が設定されている時は例外が発生しない_内容は値あり() throws Exception {
-		new Task(titleMaxLengthValue, detail);
+		Task.createWithoutId(titleMaxLengthValue, detail);
 	}
 
 	@Test
 	public void タイトルがNULLの時はIllegalArgumentExceptionが発生する() throws Exception {
 		expectedException.expect(IllegalArgumentException.class);
 		expectedException.expectMessage("Title cannot be null or empty.");
-		new Task(null, detail);
+		Task.createWithoutId(null, detail);
 	}
 
 	@Test
 	public void タイトルが長さ0の時はIllegalArgumentExceptionが発生する() throws Exception {
 		expectedException.expect(IllegalArgumentException.class);
 		expectedException.expectMessage("Title cannot be null or empty.");
-		new Task("", detail);
+		Task.createWithoutId("", detail);
+	}
+
+	@Test
+	public void タイトルが半角スペースのみの時はIllegalArgumentExceptionが発生する() throws Exception {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("Title must not be blank.");
+		Task.createWithoutId(" ", detail);
+	}
+
+	@Test
+	public void タイトルが全角スペースのみの時はIllegalArgumentExceptionが発生する() throws Exception {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("Title must not be blank.");
+		Task.createWithoutId("　", detail);
 	}
 
 	@Test
 	public void タイトルが255文字を超えている時はIllegalArgumentExceptionが発生する() throws Exception {
 		expectedException.expect(IllegalArgumentException.class);
 		expectedException.expectMessage("Title's length must be less than equals 255 characters.");
-		new Task(titleLengthOverValue, detail);
+		Task.createWithoutId(titleLengthOverValue, detail);
 	}
 }
