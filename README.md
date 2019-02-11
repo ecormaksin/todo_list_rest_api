@@ -74,5 +74,5 @@ npm install -g bootprint-swagger
 - 出力毎
 ```
 cd <プロジェクトルートフォルダ>
-bootprint swagger http://localhost:8080/v2/api-docs?group=todo-api /doc/bootprint-swagger
+bootprint swagger "http://localhost:8080/v2/api-docs?group=todo-api" ./doc/bootprint-swagger
 ```
