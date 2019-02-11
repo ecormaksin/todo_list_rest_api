@@ -7,7 +7,6 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.springframework.stereotype.Component;
 
@@ -16,11 +15,11 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.Optional;
 
 import springfox.documentation.builders.ModelPropertyBuilder;
-import springfox.documentation.service.AllowableRangeValues;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.ModelPropertyBuilderPlugin;
 import springfox.documentation.spi.schema.contexts.ModelPropertyContext;
 
+// http://acro-engineer.hatenablog.com/entry/2016/01/14/121000
 @Component
 public class CustomModelPropertyBuilderPlugin implements ModelPropertyBuilderPlugin {
 
@@ -40,28 +39,16 @@ public class CustomModelPropertyBuilderPlugin implements ModelPropertyBuilderPlu
 		AnnotatedMethod method = beanDef.getGetter();
 		if (null == method) return;
 		
-		// 必須・非必須を取得する
-		setRequiredAndAllowEmptyValue(builder, method);
-		
-		// 範囲制約を取得する
-		Size size = method.getAnnotation(Size.class);
-		if (size != null) {
-			builder.allowableValues(new AllowableRangeValues(
-					Long.toString(size.min()), Long.toString(size.max())));
-		}
+		// 必須・スペースのみ禁止を設定する
+		NotBlank notBlank = method.getAnnotation(NotBlank.class);
+		setRequiredFromAnnotations(builder, method, notBlank);
+		setProhibitEmptyValue(builder, notBlank);
 	}
 	
 	enum EndLoop {
 		TRUE,
 		FALSE,
 		;
-	}
-	
-	private void setRequiredAndAllowEmptyValue(ModelPropertyBuilder builder, AnnotatedMethod method) {
-		
-		NotBlank notBlank = method.getAnnotation(NotBlank.class);
-		setRequiredFromAnnotations(builder, method, notBlank);
-		setAllowEmptyValue(builder, notBlank);
 	}
 	
 	private void setRequiredFromAnnotations(ModelPropertyBuilder builder
@@ -94,7 +81,7 @@ public class CustomModelPropertyBuilderPlugin implements ModelPropertyBuilderPlu
 		return EndLoop.TRUE;
 	}
 	
-	private void setAllowEmptyValue(ModelPropertyBuilder builder, NotBlank notBlank) {
+	private void setProhibitEmptyValue(ModelPropertyBuilder builder, NotBlank notBlank) {
 		if (null == notBlank) return;
 		builder.allowEmptyValue(false);
 	}

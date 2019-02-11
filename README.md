@@ -59,3 +59,20 @@ docker run -it -e "TZ=Asia/Tokyo" -e POSTGRES_PASSWORD=secret -h pg-todo-list01 
 
 ## テストデータ
 - ユニットテストおよびswagger-ui用のデータを[test_data.xlsx](/doc/test_data.xlsx)で作成しています。
+
+# 作業用の記録
+
+## Bootprintで静的API仕様書を出力する方法
+http://acro-engineer.hatenablog.com/entry/2015/12/03/121500
+
+- 初回のみ
+```
+npm install -g bootprint
+npm install -g bootprint-swagger
+```
+
+- 出力毎
+```
+cd <プロジェクトルートフォルダ>
+bootprint swagger http://localhost:8080/v2/api-docs?group=todo-api /doc/bootprint-swagger
+```

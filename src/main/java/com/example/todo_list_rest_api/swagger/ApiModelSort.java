@@ -8,10 +8,10 @@ import lombok.Data;
 @Data
 public class ApiModelSort {
 
-	@ApiModelProperty(value = "ソートキーが未指定の場合はtrue")
+	@ApiModelProperty(value = "ソートキーが未指定の場合はtrue（※今回はソート指定に対応していないため常にtrue）")
 	private boolean empty;
-	@ApiModelProperty(value = "ソートされている場合はtrue")
+	@ApiModelProperty(value = "ソートされている場合はtrue（※今回はソート指定に対応していないため常にfalse）")
 	private boolean sorted;
-	@ApiModelProperty(value = "ソートされていない場合はtrue")
+	@ApiModelProperty(value = "ソートされていない場合はtrue（※今回はソート指定に対応していないため常にtrue）")
 	private boolean unsorted;
 }

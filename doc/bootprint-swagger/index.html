@@ -992,7 +992,7 @@
                                                     
                                                 </dt>
                                                 <dd>
-                                                    <p>ソートキーが未指定の場合はtrue</p>
+                                                    <p>ソートキーが未指定の場合はtrue（※今回はソート指定に対応していないため常にtrue）</p>
                                     
                                                     <div class="json-inner-schema">
                                                         
@@ -1006,7 +1006,7 @@
                                                     
                                                 </dt>
                                                 <dd>
-                                                    <p>ソートされている場合はtrue</p>
+                                                    <p>ソートされている場合はtrue（※今回はソート指定に対応していないため常にfalse）</p>
                                     
                                                     <div class="json-inner-schema">
                                                         
@@ -1020,7 +1020,7 @@
                                                     
                                                 </dt>
                                                 <dd>
-                                                    <p>ソートされていない場合はtrue</p>
+                                                    <p>ソートされていない場合はtrue（※今回はソート指定に対応していないため常にtrue）</p>
                                     
                                                     <div class="json-inner-schema">
                                                         
@@ -1064,10 +1064,13 @@
                                                     <span class="json-property-type">string</span>
                                                     <span class="json-property-range" title="Value limits"></span>
                                                     
+                                                        <span class="json-property-range" title="String length limits">
+                                                                (1 to 255 chars)
+                                                        </span>
                                                         <span class="json-property-required"></span>
                                                 </dt>
                                                 <dd>
-                                                    <p>タイトル（必須、255文字以内）</p>
+                                                    <p>タイトル</p>
                                     
                                                     <div class="json-inner-schema">
                                                         

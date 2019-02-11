@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -13,6 +14,7 @@ import com.example.todo_list_rest_api.swagger.ApiModelPage;
 import com.example.todo_list_rest_api.task.domain.Task;
 import com.fasterxml.classmate.TypeResolver;
 
+import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.schema.AlternateTypeRules;
@@ -28,6 +30,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
+@Import(BeanValidatorPluginsConfiguration.class) // https://dev.classmethod.jp/beginners/springfox_create_api_specification_detail_1/
 public class Swagger2Config {
 
 	@Autowired
