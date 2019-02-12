@@ -15,7 +15,7 @@ docker run -it -e "TZ=Asia/Tokyo" -e POSTGRES_PASSWORD=secret -h pg-todo-list01 
 ```
 - DB用コンテナを起動した後は、[プロジェクト内の「com.example.todo_list_rest_api.TodoListRestApiApplication.main(String[])」](/src/main/java/com/example/todo_list_rest_api/TodoListRestApiApplication.java)か、Maven packageで生成した「todo_list_rest_api.jar」を実行します。
 
-- プロジェクトまたはjar実行後に「http://localhost:8080/swagger-ui.html 」へアクセスすると、[SpringFox](http://springfox.github.io/springfox/)で生成されたSwagger-UIで、APIの仕様と動作が確認できます。起動時にMavenプロファイル「swagger」を指定（-Dspring.profiles.active=swagger）すると、実際の動作環境とは別のDBへ100件分のサンプルデータを格納した状態でAPIの動作を確認できます。
+- プロジェクトまたはjar実行後に「http://localhost:8080/swagger-ui.html 」へアクセスすると、[SpringFox](http://springfox.github.io/springfox/)で生成されたSwagger-UIで、APIの仕様と動作が確認できます。起動時にMavenプロファイル「swagger」を指定（--spring.profiles.active=swagger）すると、実際の動作環境とは別のDBへ100件分のサンプルデータを格納した状態でAPIの動作を確認できます。
 
 - APIの仕様については上記の「http://localhost:8080/swagger-ui.html 」へアクセスいただくか、オフラインでは[プロジェクト内にbootprint-swaggerで作成したドキュメント](/doc/bootprint-swagger/index.html)をご参照ください。
 
