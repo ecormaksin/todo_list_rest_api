@@ -16,27 +16,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "tasks")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //https://teratail.com/questions/128905
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @ApiModel(value = "Task")
 public class Task implements Comparable<Task> {
 	
 	public static final int TITLE_MAX_LENGTH = 255;
+	public static final int DETAIL_MAX_LENGTH = 2000;
+
+	private static final String ERROR_MESSAGE_LENGTH_OVER = "{0} must be within {1} characters.";
 
 	private static final String TITLE_NAME = "Title";
-	private static final String ERROR_MESSAGE_TITLE_REQUIRED = TITLE_NAME + " cannot be null or empty.";
-	private static final String ERROR_MESSAGE_TITLE_MUST_NOT_BE_BLANK = TITLE_NAME + " must not be blank.";
-	private static final String ERROR_MESSAGE_TITLE_LENGTH_OVER = TITLE_NAME + "'s length must be less than equals " + TITLE_MAX_LENGTH + " characters.";
+	private static final String ERROR_MESSAGE_TITLE_REQUIRED = TITLE_NAME + " must not be null or empty or blank.";
+
+	private static final String DETAIL_NAME = "Detail";
 	
 	@ApiModelProperty(value = "ID（自動採番）", position = 1)
 	@Id
@@ -50,35 +47,56 @@ public class Task implements Comparable<Task> {
 	@Size(min = 1, max = TITLE_MAX_LENGTH)
 	@Getter
 	private String title;
-	@ApiModelProperty(value = "内容（任意、文字数制限は1GB(4バイト文字だと268,435,456文字)以内）", position = 3)
-	@Column(nullable = true, columnDefinition = "text")
+	@ApiModelProperty(value = "内容", position = 3)
+	@Size(max = DETAIL_MAX_LENGTH)
 	@Getter
-	@Setter
 	private String detail;
 	
-	public static Task createWithoutId(String title, String detail) throws Exception {
-		checkTitle(title);
-		return Task.builder()
-			.title(title)
-			.detail(detail)
-			.build();
+	public Task() {
 	}
 
-	public void setTitle(String title) throws Exception {
+	public Task(Integer id
+			, @NotBlank @Size(min = 1, max = TITLE_MAX_LENGTH) String title
+			, @Size(max = DETAIL_MAX_LENGTH) String detail) throws IllegalArgumentException {
+		this.id = id;
+		setTitle(title);
+		setDetail(detail);
+	}
+
+	public static Task createWithoutId(
+			@NotBlank @Size(min = 1, max = TITLE_MAX_LENGTH) String title
+			, @Size(max = DETAIL_MAX_LENGTH) String detail) throws IllegalArgumentException {
+		return new Task(null, title, detail);
+	}
+
+	public void setTitle(String title) throws IllegalArgumentException {
 		checkTitle(title);
 		this.title = title;
 	}
 	
-	private static void checkTitle(String title) throws Exception {
-		if("".equals(StringUtils.defaultString(title))) {
+	private static void checkTitle(String title) throws IllegalArgumentException {
+		if("".equals(StringUtils.defaultString(title))
+				|| StringUtils.containsOnly(title, ' ', '　')) {
 			throw new IllegalArgumentException(ERROR_MESSAGE_TITLE_REQUIRED);
 		}
-		if (StringUtils.containsOnly(title, ' ', '　')) {
-			throw new IllegalArgumentException(ERROR_MESSAGE_TITLE_MUST_NOT_BE_BLANK);
-		}
-		if (TITLE_MAX_LENGTH < title.length()) {
-			throw new IllegalArgumentException(ERROR_MESSAGE_TITLE_LENGTH_OVER);
-		}
+		checkLength(TITLE_NAME, title, TITLE_MAX_LENGTH);
+	}
+	
+	public void setDetail(String detail) throws IllegalArgumentException {
+		checkDetail(detail);
+		this.detail = detail;
+	}
+	
+	private static void checkDetail(String detail) throws IllegalArgumentException {
+		if (null == detail) return;
+		checkLength(DETAIL_NAME, detail, DETAIL_MAX_LENGTH);
+	}
+	
+	private static void checkLength(String fieldName, String value, int length) throws IllegalArgumentException {
+		if (length >= value.length()) return;
+		throw new IllegalArgumentException(
+				java.text.MessageFormat.format(ERROR_MESSAGE_LENGTH_OVER, fieldName, length)
+				);
 	}
 	
 	@Override
