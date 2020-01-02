@@ -10,7 +10,7 @@ java -jar todo_list_rest_api.jar --spring.profiles.active=swagger
 
 - 起動直後
 ```
-curl http://localhost:8080/api/tasks -v GET
+curl http://localhost:8080/api/tasks -v
 ```
 - タイトルがnullでエラー
 

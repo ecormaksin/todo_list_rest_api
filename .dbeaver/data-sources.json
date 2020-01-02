@@ -1,0 +1,52 @@
+{
+	"folders": {},
+	"connections": {
+		"postgres-jdbc-168854faca8-59109ef80149cf94": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "PostgreSQL - todolist",
+			"save-password": true,
+			"show-system-objects": true,
+			"read-only": false,
+			"configuration": {
+				"host": "192.168.2.100",
+				"port": "5432",
+				"database": "todolist",
+				"url": "jdbc:postgresql://192.168.2.100:5432/todolist",
+				"type": "dev",
+				"properties": {
+					"connectTimeout": "20",
+					"loginTimeout": "20"
+				},
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "true",
+					"@dbeaver-show-template-db@": "false"
+				},
+				"handlers": {}
+			}
+		},
+		"h2_embedded-168bd60bc32-680190e8415d852": {
+			"provider": "generic",
+			"driver": "h2_embedded",
+			"name": "H2 - todolistdb",
+			"save-password": true,
+			"show-system-objects": true,
+			"read-only": false,
+			"configuration": {
+				"database": "/tmp/todolistdb",
+				"url": "jdbc:h2:/tmp/todolistdb",
+				"type": "dev"
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "開発",
+			"color": "255,255,255",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false
+		}
+	}
+}
